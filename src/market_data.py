@@ -17,6 +17,7 @@ from datetime import datetime, time as dt_time
 import pandas as pd
 import numpy as np
 import pyarrow.dataset as ds
+import pyarrow.compute as pc
 
 from src.config import (
     PROJECT_ROOT,
@@ -49,8 +50,9 @@ class MarketDataReader:
         """Returns set of legitimate canonical equity symbols from frozen Parquet dataset."""
         if self._symbols_cache is not None:
             return self._symbols_cache
-        table = self.dataset.to_table(columns=["symbol"])
-        symbols = set(table.column("symbol").unique().to_pylist())
+        symbols = set()
+        for batch in self.dataset.to_batches(columns=["symbol"]):
+            symbols.update(pc.unique(batch["symbol"]).to_pylist())
         self._symbols_cache = {s.upper() for s in symbols}
         return self._symbols_cache
 
@@ -58,7 +60,8 @@ class MarketDataReader:
         """Returns sorted list of distinct trading dates (YYYY-MM-DD) in IST."""
         if self._dates_cache is not None:
             return self._dates_cache
-        table = self.dataset.to_table(columns=["ts"])
+        filter_expr = ds.field("symbol").isin(["RELIANCE", "360ONE"])
+        table = self.dataset.to_table(filter=filter_expr, columns=["ts"])
         ts_series = table.column("ts").to_pandas()
         dates = sorted(ts_series.dt.tz_convert(TIMEZONE).dt.date.astype(str).unique().tolist())
         self._dates_cache = dates
