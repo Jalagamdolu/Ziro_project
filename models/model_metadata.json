@@ -1,0 +1,68 @@
+{
+    "model_name": "Logistic Regression (L2, C=1.0, class_weight='balanced')",
+    "model_version": "1.0.0",
+    "dedicated_h1_model": "H1 Random Forest (depth=6, min_samples_leaf=15)",
+    "feature_list": [
+        "return_1m",
+        "return_5m",
+        "return_15m",
+        "return_30m",
+        "return_60m",
+        "return_1m_missing",
+        "return_5m_missing",
+        "return_15m_missing",
+        "return_30m_missing",
+        "return_60m_missing",
+        "price_range_pct",
+        "distance_from_ma_5",
+        "distance_from_ma_15",
+        "distance_from_ma_30",
+        "volatility_5m",
+        "volatility_15m",
+        "volatility_30m",
+        "volatility_60m",
+        "volume_ratio",
+        "log_volume_change",
+        "prev_vol_zero_flag",
+        "price_change_from_open",
+        "session_range_pct",
+        "day_of_week",
+        "observed_sessions_ahead",
+        "calendar_days_ahead"
+    ],
+    "class_mapping": {
+        "DOWN": 0,
+        "STABLE": 1,
+        "UP": 2
+    },
+    "inv_class_mapping": {
+        "0": "DOWN",
+        "1": "STABLE",
+        "2": "UP"
+    },
+    "training_row_count": 4824,
+    "validation_row_count": 687,
+    "test_row_count": 1235,
+    "training_date_range": "2026-08-17 to 2026-08-27 (Target <= 2026-08-27)",
+    "validation_date_range": "2026-08-28 to 2026-09-02 (Target <= 2026-09-02)",
+    "test_date_range": "2026-09-09 to 2026-09-10 (Target = 2026-09-10)",
+    "target_definition": {
+        "formula": "(target_close - reference_close) / reference_close * 100",
+        "classes": {
+            "UP": "> +1.0%",
+            "DOWN": "< -1.0%",
+            "STABLE": "[-1.0%, +1.0%]"
+        }
+    },
+    "horizon_scope": "1 to 7 observed trading sessions ahead",
+    "preprocessing_description": "Fitted strictly on 4,824 Clean Training rows: 1) SimpleImputer(strategy='median') for missing return horizons; 2) Winsorizer clipping between training 1st and 99th percentiles; 3) RobustScaler() centering on training median and scaling by IQR.",
+    "evaluation_metrics": {
+        "selection_metric": "Validation Macro F1",
+        "validation_macro_f1": 0.3462,
+        "validation_balanced_accuracy": 0.3671,
+        "validation_accuracy": 0.4178,
+        "test_macro_f1": 0.3563,
+        "test_balanced_accuracy": 0.3869,
+        "test_accuracy": 0.4640
+    }
+}

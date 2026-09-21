@@ -1,0 +1,14 @@
+trade_date,day_of_week,total_rows,yahoo_rows,total_symbols,yahoo_symbols,min_time_ist,max_time_ist,session_status,eligible_reference,eligible_target
+2026-08-10,Mon,15,15,3,3,15:11:00,15:15:00,pilot/canary,False,False
+2026-08-11,Tue,1804,1804,5,5,09:15:00,15:15:00,pilot/canary,False,False
+2026-08-12,Wed,1805,1805,5,5,09:15:00,15:15:00,pilot/canary,False,False
+2026-08-13,Thu,1805,1805,5,5,09:15:00,15:15:00,pilot/canary,False,False
+2026-08-14,Fri,49455,49455,206,206,09:15:00,15:29:00,partial,False,False
+2026-08-17,Mon,549195,547204,2283,2283,09:15:00,15:29:00,full,True,True
+2026-08-18,Tue,95467,95467,776,776,09:15:00,15:29:00,partial,True,True
+2026-08-19,Wed,302607,302607,2277,2277,09:15:00,14:58:00,full,True,True
+2026-08-27,Thu,167821,167821,2246,2246,09:15:00,11:46:00,truncated,True,False
+2026-08-28,Fri,448784,448784,1935,1935,09:15:00,15:29:00,full,True,True
+2026-09-02,Wed,145450,145450,2246,2246,09:15:00,11:31:00,truncated,True,False
+2026-09-09,Wed,548454,548454,2250,2250,09:15:00,15:29:00,full,True,True
+2026-09-10,Thu,328750,328750,2244,2244,09:15:00,14:37:00,active/incomplete,True,True

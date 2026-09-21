@@ -1,0 +1,13 @@
+model,feature_spec,split,accuracy,balanced_accuracy,macro_f1,macro_precision,macro_recall,down_f1,stable_f1,up_f1,down_precision,stable_precision,up_precision,down_recall,stable_recall,up_recall,log_loss
+"Logistic Regression (L2, C=0.1)",FULL (26 feats),Validation,0.3828,0.3564,0.3305,0.3539,0.3564,0.4899,0.2793,0.2222,0.5656,0.2007,0.2955,0.432,0.459,0.1781,
+"Logistic Regression (L2, C=0.1)",NO_HORIZON (24 feats),Validation,0.4148,0.3983,0.3714,0.3838,0.3983,0.51,0.2531,0.3513,0.6325,0.252,0.2669,0.4272,0.2541,0.5137,
+"Logistic Regression (L2, C=0.1)",FULL (26 feats),Test,0.4713,0.3868,0.3661,0.4046,0.3868,0.3924,0.6062,0.0997,0.357,0.5569,0.3,0.4357,0.665,0.0598,
+"Logistic Regression (L2, C=0.1)",NO_HORIZON (24 feats),Test,0.281,0.3399,0.2781,0.3667,0.3399,0.3171,0.2171,0.3001,0.2961,0.597,0.2069,0.3412,0.1327,0.5458,
+"Random Forest (depth=8, trees=150)",FULL (26 feats),Validation,0.2635,0.4076,0.2687,0.3706,0.4076,0.1414,0.3241,0.3406,0.5484,0.202,0.3615,0.0811,0.8197,0.3219,
+"Random Forest (depth=8, trees=150)",NO_HORIZON (24 feats),Validation,0.3261,0.3852,0.3152,0.3555,0.3852,0.3316,0.2418,0.3722,0.6,0.2011,0.2653,0.2291,0.3033,0.6233,
+"Random Forest (depth=8, trees=150)",FULL (26 feats),Test,0.4753,0.3923,0.3739,0.4066,0.3923,0.2243,0.637,0.2603,0.4069,0.5426,0.2704,0.1549,0.7711,0.251,
+"Random Forest (depth=8, trees=150)",NO_HORIZON (24 feats),Test,0.3158,0.3604,0.3129,0.3873,0.3604,0.263,0.3606,0.315,0.2926,0.655,0.2144,0.2388,0.2488,0.5936,
+"XGBoost (depth=4, lr=0.05, trees=100)",FULL (26 feats),Validation,0.2489,0.3934,0.2427,0.3613,0.3934,0.1271,0.3287,0.2724,0.566,0.2027,0.3153,0.0716,0.8689,0.2397,
+"XGBoost (depth=4, lr=0.05, trees=100)",NO_HORIZON (24 feats),Validation,0.3493,0.3717,0.3204,0.359,0.3717,0.4051,0.2092,0.347,0.6207,0.2137,0.2425,0.3007,0.2049,0.6096,
+"XGBoost (depth=4, lr=0.05, trees=100)",FULL (26 feats),Test,0.4818,0.3804,0.3531,0.4024,0.3804,0.1964,0.6481,0.215,0.4153,0.5319,0.2599,0.1286,0.8292,0.1833,
+"XGBoost (depth=4, lr=0.05, trees=100)",NO_HORIZON (24 feats),Test,0.3077,0.3661,0.3073,0.4028,0.3661,0.3128,0.2953,0.3139,0.3449,0.6534,0.21,0.2861,0.1907,0.6215,

@@ -1,0 +1,5 @@
+baseline,split,accuracy,balanced_accuracy,macro_f1,macro_precision,macro_recall,down_f1,stable_f1,up_f1,down_precision,stable_precision,up_precision,down_recall,stable_recall,up_recall,log_loss
+Global Majority Class (DOWN),Validation,0.6099,0.3333,0.2526,0.2033,0.3333,0.7577,0.0,0.0,0.6099,0.0,0.0,1.0,0.0,0.0,
+Global Majority Class (DOWN),Test,0.3085,0.3333,0.1572,0.1028,0.3333,0.4715,0.0,0.0,0.3085,0.0,0.0,1.0,0.0,0.0,
+Horizon-Conditional Majority,Validation,0.1776,0.3333,0.1005,0.0592,0.3333,0.0,0.3016,0.0,0.0,0.1776,0.0,0.0,1.0,0.0,
+Horizon-Conditional Majority,Test,0.4883,0.3333,0.2187,0.1628,0.3333,0.0,0.6561,0.0,0.0,0.4883,0.0,0.0,1.0,0.0,

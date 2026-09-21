@@ -1,0 +1,5 @@
+candidate_id,dataset_scope,train_ref_dates,val_ref_dates,test_ref_dates,raw_train_pairs,purged_train_pairs,retained_train_pairs,raw_val_pairs,purged_val_pairs,retained_val_pairs,test_pairs,total_retained_pairs,train_purged_pct,val_purged_pct
+Candidate 1 (Multi-Horizon Pooled: 3-Phase Dates),All Horizons (1 to 7 sessions),"2026-08-17, 2026-08-18, 2026-08-19","2026-08-27, 2026-08-28","2026-09-02, 2026-09-09",14724,12638,2086,6887,5893,994,2959,6039,85.83,85.57
+Candidate 2 (Multi-Horizon Pooled: Expanded Train),All Horizons (1 to 7 sessions),"2026-08-17, 2026-08-18, 2026-08-19, 2026-08-27","2026-08-28, 2026-09-02","2026-09-09, 2026-09-10",18904,14080,4824,4431,3744,687,1235,6746,74.48,84.5
+Candidate 3 (Horizon-1 Specialized Model),Horizon = 1 Session Ahead Only,"2026-08-17, 2026-08-18, 2026-08-19","2026-08-27, 2026-08-28","2026-09-02, 2026-09-09",2012,1158,854,1681,687,994,2100,3948,57.55,40.87
+Candidate 4 (Horizon-2 Specialized Model),Horizon = 2 Sessions Ahead Only,"2026-08-17, 2026-08-18","2026-08-19, 2026-08-27","2026-08-28, 2026-09-02",1629,1629,0,1870,1870,0,1870,1870,100.0,100.0

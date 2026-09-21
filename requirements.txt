@@ -1,0 +1,33 @@
+# ==============================================================================
+# NSE Intraday Stock Price Movement Prediction & Paper Trading System
+# Production & Development Dependencies
+# ==============================================================================
+
+# Core Framework & REST API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.8.0
+python-multipart>=0.0.9
+
+# Streamlit Governance Dashboard
+streamlit>=1.38.0
+
+# Database & Storage
+SQLAlchemy>=2.0.30
+psycopg[binary]>=3.1.18
+pyarrow>=17.0.0
+
+# Scientific & Machine Learning
+numpy>=1.26.0,<3.0.0
+pandas>=2.2.0,<4.0.0
+scipy>=1.13.0
+scikit-learn>=1.5.0
+joblib>=1.4.0
+matplotlib>=3.9.0
+
+# Automated Testing
+pytest>=8.0.0
+httpx>=0.27.0
+
+# Optional Training Library
+xgboost>=2.1.0
