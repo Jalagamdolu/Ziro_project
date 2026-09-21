@@ -1,0 +1,236 @@
+/* ==============================================================================
+   ZIRO PREDICT - VIEW-SPECIFIC STYLES
+   ============================================================================== */
+
+/* View Grid Layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ------------------------------------------------------------------------------
+   1. LIVE PREDICTION VIEW
+   ------------------------------------------------------------------------------ */
+.predict-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .predict-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Prediction Result Hero Card */
+.result-hero {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  background: radial-gradient(circle at 50% 0%, var(--bg-surface-elevated) 0%, var(--bg-card) 75%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-medium);
+  margin-bottom: var(--space-6);
+}
+
+.result-direction-banner {
+  font-family: var(--font-heading);
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: var(--space-2) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.result-direction-banner.up { color: var(--color-up); text-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
+.result-direction-banner.down { color: var(--color-down); text-shadow: 0 0 30px rgba(244, 63, 94, 0.4); }
+.result-direction-banner.stable { color: var(--color-stable); text-shadow: 0 0 30px rgba(148, 163, 184, 0.25); }
+
+.price-display {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.probability-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.prob-card {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  text-align: center;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.prob-card:hover {
+  transform: translateY(-2px);
+}
+
+.prob-card.highest {
+  border-color: var(--brand-accent);
+  background-color: var(--bg-surface-elevated);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+.prob-card .prob-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1);
+}
+
+.prob-card.down .prob-name { color: var(--color-down); }
+.prob-card.stable .prob-name { color: var(--color-stable); }
+.prob-card.up .prob-name { color: var(--color-up); }
+
+.prob-card .prob-percent {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ------------------------------------------------------------------------------
+   2. PREDICTION HISTORY VIEW
+   ------------------------------------------------------------------------------ */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-4);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.filter-bar .form-group {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 140px;
+}
+
+/* ------------------------------------------------------------------------------
+   3. PERFORMANCE DASHBOARD VIEW
+   ------------------------------------------------------------------------------ */
+.benchmark-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 850px) {
+  .benchmark-comparison {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benchmark-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.benchmark-card.historical {
+  border-left: 4px solid var(--brand-accent);
+}
+
+.benchmark-card.forward {
+  border-left: 4px solid var(--color-up);
+}
+
+/* Confusion Matrix Grid */
+.confusion-matrix-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+  margin-top: var(--space-3);
+}
+
+.confusion-matrix-table th {
+  padding: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.confusion-matrix-table td {
+  padding: 14px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.confusion-matrix-table td.diagonal {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: var(--color-up);
+}
+
+/* ------------------------------------------------------------------------------
+   4. MODEL INFORMATION VIEW
+   ------------------------------------------------------------------------------ */
+.feature-pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.feature-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--brand-accent);
+}
+
+.feature-category {
+  margin-bottom: var(--space-5);
+}
+
+.feature-category h4 {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}

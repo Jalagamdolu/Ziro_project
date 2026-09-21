@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ziro Predict — NSE Stock Movement Prediction System</title>
+  <meta name="description" content="Production-grade financial analytics dashboard for NSE stock price movement classification over 1 to 7 observed trading sessions.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/views.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div>
+        <!-- Brand Header -->
+        <div class="brand-section">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">ZIRO PREDICT</div>
+            <div class="brand-subtitle">NSE INTRADAY ML</div>
+          </div>
+        </div>
+
+        <!-- Menu Items -->
+        <ul class="nav-menu">
+          <li>
+            <a class="nav-item active" data-view="dashboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" data-view="predict">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              <span>Live Prediction</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" data-view="history">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Prediction History</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" data-view="performance">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+              <span>Performance</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" data-view="model-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+              <span>Model &amp; Features</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" data-view="about">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>About &amp; Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sidebar Status Footer -->
+      <div class="sidebar-footer">
+        <div class="health-status-badge">
+          <div id="sidebar-health-indicator" class="status-indicator"></div>
+          <span id="sidebar-health-text">Connecting...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+      <!-- Top Sticky Header -->
+      <header class="top-header">
+        <div>
+          <h1 id="page-title" class="page-heading">Overview Dashboard</h1>
+          <div id="page-caption" class="page-caption">NSE Intraday Movement Prediction &amp; Paper Evaluation Platform</div>
+        </div>
+
+        <div class="header-actions">
+          <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: var(--brand-accent); border: 1px solid rgba(56, 189, 248, 0.25);">
+            Paper Evaluation Mode
+          </span>
+        </div>
+      </header>
+
+      <!-- Dynamic View Container -->
+      <div id="view-container" class="content-area">
+        <!-- Rendered by JS router -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Main ES6 Application Module -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+/* ==============================================================================
+   ZIRO PREDICT DESIGN SYSTEM - DESIGN TOKENS
+   Dark-mode Institutional Financial Analytics Aesthetic
+   ============================================================================== */
+
+:root {
+  /* Color Palette - Core Backgrounds & Surfaces */
+  --bg-app: #080c14;
+  --bg-sidebar: #0d131f;
+  --bg-surface: #111827;
+  --bg-surface-elevated: #1a2234;
+  --bg-surface-hover: #202b40;
+  --bg-card: rgba(17, 24, 39, 0.85);
+  --bg-card-hover: rgba(26, 34, 52, 0.95);
+  
+  /* Borders & Dividers */
+  --border-subtle: #1e293b;
+  --border-medium: #2e3d55;
+  --border-strong: #475569;
+  --border-focus: #38bdf8;
+  
+  /* Text & Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0b0f19;
+  
+  /* Directional & Semantic Colors */
+  --color-up: #10b981;
+  --color-up-bg: rgba(16, 185, 129, 0.12);
+  --color-up-border: rgba(16, 185, 129, 0.35);
+  
+  --color-down: #f43f5e;
+  --color-down-bg: rgba(244, 63, 94, 0.12);
+  --color-down-border: rgba(244, 63, 94, 0.35);
+  
+  --color-stable: #94a3b8;
+  --color-stable-bg: rgba(148, 163, 184, 0.12);
+  --color-stable-border: rgba(148, 163, 184, 0.35);
+
+  /* Primary Accent & Brand */
+  --brand-primary: #0284c7;
+  --brand-accent: #38bdf8;
+  --brand-glow: rgba(56, 189, 248, 0.25);
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  
+  /* Status Colors */
+  --status-healthy: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+  --status-info: #0ea5e9;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  
+  /* Shadows & Depth */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 20px var(--brand-glow);
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
