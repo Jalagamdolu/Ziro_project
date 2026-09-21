@@ -127,17 +127,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Mandatory Safety Banner
-st.markdown("""
-<div class="safety-banner">
-    ⚠️ <strong>PAPER EVALUATION ONLY — NOT CONFIGURED FOR REAL-MONEY TRADING</strong><br>
-    <span style="font-weight: 400; font-size: 0.85rem; color: #7F1D1D;">
-    This dashboard provides simulated machine learning movement forecasts and paper evaluation tracking. 
-    Zero real-money broker or order routing functionality exists.
-    </span>
-</div>
-""", unsafe_allow_html=True)
-
 # Sidebar Navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
