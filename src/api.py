@@ -104,6 +104,15 @@ class HealthResponse(BaseModel):
 
 # --- Endpoints ---
 
+@app.get("/", tags=["Health"])
+def root_health_check():
+    """Root endpoint for cloud load balancers and Render health checks."""
+    return {
+        "status": "HEALTHY",
+        "service": "NSE Intraday Stock Movement Prediction API",
+        "version": "1.0.0"
+    }
+
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 def health_check():
     """System health check and loaded model diagnostics."""
