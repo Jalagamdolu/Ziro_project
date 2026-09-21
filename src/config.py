@@ -7,20 +7,26 @@ from pathlib import Path
 
 # Paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
 REPORTS_DIR = PROJECT_ROOT / "reports"
 FIGURES_DIR = PROJECT_ROOT / "figures"
 MODELS_DIR = PROJECT_ROOT / "models"
 SRC_DIR = PROJECT_ROOT / "src"
 
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Database URL - uses the existing TimescaleDB/PostgreSQL instance
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://nse_user:nse_password@localhost:5433/nse_minute"
-)
+# Frozen Market Data (Parquet)
+FROZEN_PARQUET_PATH = DATA_DIR / "ziro_frozen_dataset.parquet"
+
+# Paper Trading Persistence (SQLite default, zero external DB required)
+SQLITE_DB_PATH = DATA_DIR / "paper_predictions.db"
+PAPER_TRADING_DB_URL = os.getenv("PAPER_TRADING_DB_URL", f"sqlite:///{SQLITE_DB_PATH}")
+
+# Legacy PostgreSQL Database URL (Optional: NOT required for Ziro runtime)
+DATABASE_URL = os.getenv("DATABASE_URL", None)
 
 # Canonical Ingestion Source
 CANONICAL_SOURCE = "yahoo"

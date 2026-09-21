@@ -1,10 +1,11 @@
 # NSE Intraday Stock Price Movement Prediction & Paper Trading System
 
-[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.38+-red.svg)](https://streamlit.io/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5+-orange.svg)](https://scikit-learn.org/)
-[![PostgreSQL / TimescaleDB](https://img.shields.io/badge/Database-PostgreSQL%2FTimescaleDB-blue.svg)](https://www.timescale.com/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.9.0-orange.svg)](https://scikit-learn.org/)
+[![Market Data](https://img.shields.io/badge/Market%20Data-PyArrow%20Parquet-blue.svg)](https://arrow.apache.org/)
+[![Paper Trading](https://img.shields.io/badge/Paper%20Trading-SQLite-blue.svg)](https://www.sqlite.org/)
 
 An end-to-end, leakage-audited machine learning system for forecasting multi-day intraday price movements on National Stock Exchange (NSE) equities. Built with rigorous temporal purging, a production-grade inference engine, a stateful paper trading lifecycle, a RESTful FastAPI backend, and an interactive Streamlit governance dashboard.
 
@@ -55,13 +56,13 @@ An end-to-end, leakage-audited machine learning system for forecasting multi-day
 ┌───────────────────────────────┐                               ┌───────────────────────────────┐
 │     Performance Evaluator     │                               │   Locked Production Model     │
 │     (src/performance.py)      │                               │    (Logistic Regression)      │
-└──────────────┬────────────────┘                               └───────────────────────────────┘
-               │
-               ▼
-┌───────────────────────────────┐
-│    paper_predictions Table    │
-│   (PostgreSQL / TimescaleDB)  │
-└───────────────────────────────┘
+└──────────────┬────────────────┘                               └───────────────┬───────────────┘
+               │                                                                │
+               ▼                                                                ▼
+┌───────────────────────────────┐                               ┌───────────────────────────────┐
+│    paper_predictions.db       │                               │   Frozen Parquet Dataset      │
+│      (SQLite Database)        │                               │    (PyArrow Dataset)          │
+└───────────────────────────────┘                               └───────────────────────────────┘
 ```
 
 ---
@@ -80,6 +81,7 @@ An end-to-end, leakage-audited machine learning system for forecasting multi-day
   - `EXPIRED`: Handled gracefully if target market candle was unavailable.
 - **Purged Temporal Split Protocol**: Eliminates multi-day target overlap between training, validation, and out-of-sample test splits.
 - **Honest Model Governance**: Evaluated strictly on **Macro F1** to prevent false confidence from non-stationary regime shifts.
+- **100% Self-Contained Runtime**: Zero PostgreSQL, TimescaleDB, or Docker requirement. Reads from the frozen historical Parquet snapshot and persists state in local SQLite.
 
 ---
 
@@ -87,15 +89,17 @@ An end-to-end, leakage-audited machine learning system for forecasting multi-day
 
 ```
 Ziro_project/
-├── .env.example                     # Environment template for DB credentials
-├── .gitignore                        # Git exclusion rules (blocks credentials and binary data)
-├── pytest.ini                        # Pytest configuration (targets tests/)
+├── .env.example                     # Optional environment template
+├── .gitignore                        # Git exclusion rules
+├── pytest.ini                        # Pytest configuration
 ├── requirements.txt                  # Production and test dependencies
 ├── README.md                         # Project documentation and user guide
 ├── app/
 │   └── streamlit_app.py              # 3-Page Streamlit governance dashboard
-├── data/                             # Curated feature datasets (Parquet)
-├── figures/                          # 8 EDA distribution and correlation figures (PNG)
+├── data/
+│   ├── ziro_frozen_dataset.parquet   # Frozen canonical market dataset (40.41 MB)
+│   └── paper_predictions.db          # Local SQLite paper-trading database
+├── figures/                          # EDA distribution and correlation figures (PNG)
 ├── models/
 │   ├── best_pooled_model.joblib      # Production Champion (Logistic Regression L2)
 │   ├── pooled_preprocessor.joblib    # Preprocessing Pipeline (Imputer + Winsorizer + Scaler)
@@ -107,20 +111,22 @@ Ziro_project/
 ├── src/
 │   ├── __init__.py
 │   ├── api.py                        # FastAPI REST service
-│   ├── config.py                     # Global constants, canonical source, and thresholds
+│   ├── config.py                     # Global constants, paths, and thresholds
 │   ├── data_quality.py               # Assertion suite for leakage and data integrity
-│   ├── eda.py                        # 11-step reproducible EDA pipeline
+│   ├── eda.py                        # Historical 11-step reproducible EDA pipeline
 │   ├── feature_engineering.py        # 26 microstructure and session features
 │   ├── horizon_analysis.py           # Sample feasibility and purged split design
-│   ├── paper_trading.py              # Lifecycle state machine and persistence layer
+│   ├── market_data.py                # Zero-copy PyArrow Parquet market-data access layer
+│   ├── paper_trading.py              # Lifecycle state machine and SQLite persistence
 │   ├── performance.py                # Out-of-sample evaluation and benchmark comparisons
 │   ├── predict.py                    # Production inference engine
 │   ├── target_creation.py            # Exact timestamp target pair generator
 │   └── train_classification.py       # Model training, baselines, and ablation suite
 └── tests/
     ├── test_api.py                   # REST endpoint and schema validation tests
-    ├── test_future_target_inference.py # Zero-target query and SQL interception tests
-    └── test_paper_trading.py         # Lifecycle and immutability validation tests
+    ├── test_future_target_inference.py # Zero-target query and leakage isolation tests
+    ├── test_paper_trading.py         # Lifecycle and immutability validation tests
+    └── test_parquet_postgres_parity.py # Parquet data access and parity test suite
 ```
 
 ---
@@ -128,8 +134,8 @@ Ziro_project/
 ## Installation & Setup
 
 ### 1. Prerequisites
-- Python 3.11, 3.12, or 3.13
-- PostgreSQL / TimescaleDB instance running on port 5433 (or SQLite fallback)
+- Python 3.11, 3.12, 3.13, or 3.14
+- *Zero external database required!* (No PostgreSQL, TimescaleDB, Docker, or DBeaver required at runtime)
 
 ### 2. Clone the Repository
 ```bash
@@ -153,15 +159,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. Configure Environment Variables
-Copy `.env.example` to `.env` and configure your database credentials:
-```bash
-cp .env.example .env
-```
-Edit `.env`:
-```ini
-DATABASE_URL=postgresql+psycopg://nse_user:nse_password@localhost:5433/nse_minute
-```
+### 5. Verify Dataset
+Ensure the frozen market dataset is available at `data/ziro_frozen_dataset.parquet`.
+The application automatically creates `data/paper_predictions.db` on first access.
 
 ---
 

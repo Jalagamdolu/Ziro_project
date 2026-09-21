@@ -35,8 +35,16 @@ desktop.ini
 *.sublime-project
 *.sublime-workspace
 
-# Large binary datasets (reproducible via pipeline from TimescaleDB)
+# Parquet datasets (only frozen canonical snapshot is tracked)
 data/*.parquet
+!data/ziro_frozen_dataset.parquet
+
+# Local runtime databases
+data/*.db
+data/paper_predictions.db
+
+# Temporary & scratch directories
+scratch/__pycache__/
 
 # Nested accidental repository
 Ziro_project/

@@ -24,10 +24,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.config import (
-    DATABASE_URL,
+    PAPER_TRADING_DB_URL,
+    SQLITE_DB_PATH,
     CANONICAL_SOURCE,
     EXCLUDED_SYNTHETIC_SYMBOLS,
-    SYNTH_SQL_TUPLE,
     TIMEZONE,
     UP_THRESHOLD_PCT,
     DOWN_THRESHOLD_PCT,
@@ -35,20 +35,18 @@ from src.config import (
 )
 from src.predict import predict_movement, get_observed_sessions_between
 
-# Allow SQLite fallback for testing or standalone execution
-PAPER_DB_URL = os.getenv("PAPER_TRADING_DB_URL", DATABASE_URL)
+# SQLite database for self-contained paper trading persistence
+PAPER_DB_URL = os.getenv("PAPER_TRADING_DB_URL", PAPER_TRADING_DB_URL)
 engine = create_engine(PAPER_DB_URL)
 
 # Cached set of valid canonical symbols
 _LEGIT_SYMBOLS_CACHE = None
 
-def get_engine(engine_override: Optional[Engine] = None) -> Engine:
-    """Returns active database engine."""
-    return engine_override or engine
+_DB_INITIALIZED_ENGINES = set()
 
 def init_paper_trading_db(engine_override: Optional[Engine] = None) -> None:
     """Creates the paper_predictions table and indices if they do not already exist."""
-    target_engine = get_engine(engine_override)
+    target_engine = engine_override or engine
     is_sqlite = target_engine.url.drivername.startswith("sqlite")
     
     if is_sqlite:
@@ -116,34 +114,34 @@ def init_paper_trading_db(engine_override: Optional[Engine] = None) -> None:
                 conn.execute(text(stmt))
         conn.commit()
 
-_DB_INITIALIZED = False
-
-def ensure_db_initialized(engine_override: Optional[Engine] = None):
-    """Initializes paper_predictions table lazily on first access."""
-    global _DB_INITIALIZED
-    if not _DB_INITIALIZED:
+def ensure_db_initialized(target_engine: Optional[Engine] = None) -> None:
+    """Initializes paper_predictions table lazily on first access for each engine."""
+    eng = target_engine or engine
+    eng_key = str(eng.url)
+    if eng_key not in _DB_INITIALIZED_ENGINES:
         try:
-            init_paper_trading_db(engine_override)
-            _DB_INITIALIZED = True
+            init_paper_trading_db(eng)
+            _DB_INITIALIZED_ENGINES.add(eng_key)
         except Exception as e:
             print(f"Notice: Initial paper_predictions DB init deferred: {e}")
 
-def get_legitimate_symbols(engine_override: Optional[Engine] = None) -> set:
-    """Returns cached set of legitimate canonical equity symbols."""
+def get_engine(engine_override: Optional[Engine] = None) -> Engine:
+    """Returns active database engine and ensures paper_predictions table exists."""
+    eng = engine_override or engine
+    ensure_db_initialized(eng)
+    return eng
+
+# Initialize default engine on module load
+ensure_db_initialized(engine)
+
+def get_legitimate_symbols(engine_override: Optional[Engine] = None, market_data_source: str = "parquet") -> set:
+    """Returns cached set of legitimate canonical equity symbols from frozen Parquet dataset."""
     global _LEGIT_SYMBOLS_CACHE
     if _LEGIT_SYMBOLS_CACHE is not None:
         return _LEGIT_SYMBOLS_CACHE
         
-    target_engine = create_engine(DATABASE_URL)
-    query = text(f"""
-        SELECT DISTINCT symbol 
-        FROM ohlcv_intraday 
-        WHERE source = '{CANONICAL_SOURCE}' 
-          AND symbol NOT IN {SYNTH_SQL_TUPLE};
-    """)
-    with target_engine.connect() as conn:
-        df = pd.read_sql(query, conn)
-    _LEGIT_SYMBOLS_CACHE = set(df['symbol'].str.upper().unique())
+    from src.market_data import get_legitimate_symbols as get_parquet_symbols
+    _LEGIT_SYMBOLS_CACHE = get_parquet_symbols(source="parquet")
     return _LEGIT_SYMBOLS_CACHE
 
 def validate_prediction_inputs(symbol: str, reference_timestamp: str, target_timestamp: str, engine_override: Optional[Engine] = None) -> Dict[str, Any]:
@@ -230,7 +228,8 @@ def create_paper_prediction(
     reference_timestamp: str,
     target_timestamp: str,
     model_type: str = 'pooled',
-    engine_override: Optional[Engine] = None
+    engine_override: Optional[Engine] = None,
+    market_data_source: str = 'parquet'
 ) -> Dict[str, Any]:
     """
     STAGE A — OPEN PREDICTION LIFECYCLE:
@@ -250,11 +249,12 @@ def create_paper_prediction(
         symbol=clean_sym,
         reference_timestamp=reference_timestamp,
         target_timestamp=target_timestamp,
-        model_type=model_type
+        model_type=model_type,
+        market_data_source=market_data_source
     )
     
     prediction_id = f"pred_{uuid.uuid4().hex[:12]}"
-    created_at = datetime.now()
+    created_at = datetime.now().isoformat(sep=' ', timespec='seconds')
     
     model_name = "Logistic Regression (L2, C=1.0, class_weight='balanced')" if model_type == 'pooled' else "H1 Random Forest (depth=6)"
     model_version = "1.0.0"
@@ -298,7 +298,6 @@ def create_paper_prediction(
             :actual_price, :future_return_pct, :actual_class, :is_resolved, :resolved_at
         );
     """)
-    
     with target_engine.connect() as conn:
         conn.execute(insert_sql, record)
         conn.commit()
@@ -308,7 +307,8 @@ def create_paper_prediction(
 def resolve_prediction(
     prediction_id: str,
     as_of_time: Optional[str] = None,
-    engine_override: Optional[Engine] = None
+    engine_override: Optional[Engine] = None,
+    market_data_source: str = 'parquet'
 ) -> Dict[str, Any]:
     """
     STAGE B — RESOLUTION LIFECYCLE:
@@ -342,28 +342,20 @@ def resolve_prediction(
         # Remains OPEN
         return record
         
-    # Query actual target close price from market data
-    query = text(f"""
-        SELECT close 
-        FROM ohlcv_intraday
-        WHERE source = '{CANONICAL_SOURCE}'
-          AND symbol = :symbol
-          AND DATE(ts AT TIME ZONE '{TIMEZONE}') = :tgt_date
-          AND (ts AT TIME ZONE '{TIMEZONE}')::time = CAST(:tgt_time AS time);
-    """)
-    
-    source_engine = create_engine(DATABASE_URL)
-    with source_engine.connect() as conn:
-        df_target = pd.read_sql(query, conn, params={
-            'symbol': record['symbol'],
-            'tgt_date': tgt_date_str,
-            'tgt_time': tgt_time_str
-        })
+    # Query actual target close price from market data (frozen Parquet dataset)
+    from src.market_data import get_target_candle_close
+    actual_price = get_target_candle_close(
+        symbol=record['symbol'],
+        tgt_date=tgt_date_str,
+        tgt_time=tgt_time_str,
+        source='parquet'
+    )
+    has_candle = (actual_price is not None)
         
-    resolved_at = datetime.now()
+    resolved_at = datetime.now().isoformat(sep=' ', timespec='seconds')
     ref_price = float(record['reference_price'])
     
-    if df_target.empty:
+    if not has_candle:
         # Target candle unavailable (e.g. trading halt or future date beyond DB)
         if tgt_date_str > '2026-09-10':
             # Market date has not occurred yet
@@ -377,7 +369,6 @@ def resolve_prediction(
             actual_class = None
             is_resolved = False
     else:
-        actual_price = float(df_target['close'].iloc[0])
         future_return_pct = ((actual_price - ref_price) / ref_price) * 100.0
         
         if future_return_pct > UP_THRESHOLD_PCT:
@@ -480,7 +471,13 @@ def list_predictions(
     with target_engine.connect() as conn:
         rows = conn.execute(query, params).mappings().fetchall()
         
-    return [dict(r) for r in rows]
+    records = []
+    for r in rows:
+        d = dict(r)
+        if 'is_resolved' in d:
+            d['is_resolved'] = bool(d['is_resolved'])
+        records.append(d)
+    return records
 
 def get_prediction(prediction_id: str, engine_override: Optional[Engine] = None) -> Optional[Dict[str, Any]]:
     """Retrieves a single paper prediction by ID."""
@@ -488,4 +485,9 @@ def get_prediction(prediction_id: str, engine_override: Optional[Engine] = None)
     query = text("SELECT * FROM paper_predictions WHERE prediction_id = :pred_id;")
     with target_engine.connect() as conn:
         row = conn.execute(query, {'pred_id': prediction_id}).mappings().first()
-    return dict(row) if row else None
+    if not row:
+        return None
+    d = dict(row)
+    if 'is_resolved' in d:
+        d['is_resolved'] = bool(d['is_resolved'])
+    return d

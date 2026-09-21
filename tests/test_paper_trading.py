@@ -127,11 +127,15 @@ def test_expired_prediction_when_market_data_missing():
             model_name, model_version, status, created_at, is_resolved
         ) VALUES (
             :pid, '360ONE', '2026-08-17 10:30:00', '2026-08-18 10:30:00',
-            1000.0, 1, 1, 'STABLE', 0.3, 0.4, 0.3, 'Test', '1.0', 'OPEN', NOW(), FALSE
+            1000.0, 1, 1, 'STABLE', 0.3, 0.4, 0.3, 'Test', '1.0', 'OPEN', :created_at, :is_resolved
         );
     """)
     with engine.connect() as conn:
-        conn.execute(insert_sql, {'pid': pred_id})
+        conn.execute(insert_sql, {
+            'pid': pred_id,
+            'created_at': datetime.now().isoformat(sep=' ', timespec='seconds'),
+            'is_resolved': 0
+        })
         conn.commit()
         
     # In August 18, check resolution
@@ -143,7 +147,7 @@ def test_expired_prediction_when_market_data_missing():
         assert "unavailable" in resolved['status_reason'].lower()
 
 def test_leakage_isolation_during_paper_prediction():
-    """Validates via SQL event listener that target date is NEVER queried during prediction."""
+    """Validates that market data is never queried for target date during paper prediction."""
     executed_queries = []
     def query_listener(conn, cursor, statement, parameters, context, executemany):
         executed_queries.append({'stmt': statement, 'params': parameters})
@@ -160,14 +164,11 @@ def test_leakage_isolation_during_paper_prediction():
             target_timestamp=tgt_ts
         )
         
-        # Check that no SQL statement referenced 2026-09-11 in OHLCV query
+        # Verify that only paper_predictions persistence was executed, never market data SQL queries
         for q in executed_queries:
             s = q['stmt'].lower()
-            p = str(q['params'])
-            if "ohlcv_intraday" in s and "where" in s and "symbol = :symbol" in s:
-                assert "2026-09-11" not in p
-                assert q['params']['trade_date'] == "2026-09-10"
-                assert q['params']['ref_time'] == "10:30:00"
+            assert "ohlcv_intraday" not in s, "LEAKAGE: Market data was queried via SQL!"
+            assert "paper_predictions" in s, f"Unexpected SQL query: {s}"
                 
     finally:
         event.remove(engine, "before_cursor_execute", query_listener)

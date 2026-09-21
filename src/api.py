@@ -52,10 +52,10 @@ app.add_middleware(
 # --- Pydantic Request & Response Schemas ---
 
 class PredictionRequest(BaseModel):
-    symbol: str = Field(..., example="360ONE", description="NSE equity ticker symbol")
-    reference_timestamp: str = Field(..., example="2026-09-10 10:30", description="Reference timestamp (IST)")
-    target_timestamp: str = Field(..., example="2026-09-15 10:30", description="Target timestamp (IST)")
-    model_type: Optional[str] = Field("pooled", example="pooled", description="'pooled' or 'h1'")
+    symbol: str = Field(..., json_schema_extra={"example": "360ONE"}, description="NSE equity ticker symbol")
+    reference_timestamp: str = Field(..., json_schema_extra={"example": "2026-09-10 10:30"}, description="Reference timestamp (IST)")
+    target_timestamp: str = Field(..., json_schema_extra={"example": "2026-09-15 10:30"}, description="Target timestamp (IST)")
+    model_type: Optional[str] = Field("pooled", json_schema_extra={"example": "pooled"}, description="'pooled' or 'h1'")
 
 class PredictionResponse(BaseModel):
     symbol: str

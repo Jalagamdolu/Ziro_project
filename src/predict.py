@@ -24,7 +24,6 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import joblib
-from sqlalchemy import create_engine, text
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,7 +32,11 @@ if str(PROJECT_ROOT) not in sys.path:
 import __main__
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import RobustScaler
-from src.config import DATABASE_URL, CANONICAL_SOURCE, SYNTH_SQL_TUPLE, TIMEZONE, MODELS_DIR
+from src.config import CANONICAL_SOURCE, TIMEZONE, MODELS_DIR
+from src.market_data import (
+    get_morning_candles as get_market_morning_candles,
+    get_historical_dates as get_market_historical_dates
+)
 
 INV_CLASS_MAP = {0: 'DOWN', 1: 'STABLE', 2: 'UP'}
 
@@ -68,8 +71,6 @@ class PreprocessingPipeline:
 # Ensure PreprocessingPipeline is found when unpickling objects pickled in __main__
 setattr(__main__, 'PreprocessingPipeline', PreprocessingPipeline)
 
-engine = create_engine(DATABASE_URL)
-
 _HISTORICAL_DATES_CACHE = None
 
 def get_observed_sessions_between(ref_date: str, tgt_date: str) -> int:
@@ -93,16 +94,7 @@ def get_observed_sessions_between(ref_date: str, tgt_date: str) -> int:
         )
         
     if _HISTORICAL_DATES_CACHE is None:
-        query = text(f"""
-            SELECT DISTINCT DATE(ts AT TIME ZONE '{TIMEZONE}') as trade_date
-            FROM ohlcv_intraday
-            WHERE source = '{CANONICAL_SOURCE}'
-              AND symbol NOT IN {SYNTH_SQL_TUPLE}
-            ORDER BY trade_date;
-        """)
-        with engine.connect() as conn:
-            df_dates = pd.read_sql(query, conn)
-        _HISTORICAL_DATES_CACHE = sorted(df_dates['trade_date'].astype(str).unique())
+        _HISTORICAL_DATES_CACHE = get_market_historical_dates(source="parquet")
         
     dates = _HISTORICAL_DATES_CACHE
     
@@ -113,9 +105,16 @@ def get_observed_sessions_between(ref_date: str, tgt_date: str) -> int:
         b_days = len(pd.bdate_range(ref_dt, tgt_dt)) - 1
         return max(1, b_days)
 
-def predict_movement(symbol: str, reference_timestamp: str, target_timestamp: str, model_type: str = 'pooled') -> dict:
+def predict_movement(
+    symbol: str,
+    reference_timestamp: str,
+    target_timestamp: str,
+    model_type: str = 'pooled',
+    market_data_source: str = 'parquet'
+) -> dict:
     """
     Generates movement prediction strictly using market data up to reference_timestamp.
+    Self-contained: reads strictly from frozen Parquet dataset.
     """
     # Clean symbol
     symbol = symbol.strip().upper()
@@ -137,27 +136,13 @@ def predict_movement(symbol: str, reference_timestamp: str, target_timestamp: st
     if observed_sessions_ahead >= 8:
         print(f"Warning: Target horizon ({observed_sessions_ahead} sessions) exceeds supported range (1-7).")
         
-    # Query exact morning candles for the symbol up to reference timestamp
-    query = text(f"""
-        SELECT 
-            ts,
-            (ts AT TIME ZONE '{TIMEZONE}')::time as time_ist,
-            open, high, low, close, volume
-        FROM ohlcv_intraday
-        WHERE source = '{CANONICAL_SOURCE}'
-          AND symbol = :symbol
-          AND DATE(ts AT TIME ZONE '{TIMEZONE}') = :trade_date
-          AND (ts AT TIME ZONE '{TIMEZONE}')::time >= '09:15:00'::time
-          AND (ts AT TIME ZONE '{TIMEZONE}')::time <= CAST(:ref_time AS time)
-        ORDER BY ts;
-    """)
-    
-    with engine.connect() as conn:
-        df_candles = pd.read_sql(query, conn, params={
-            'symbol': symbol,
-            'trade_date': ref_date_str,
-            'ref_time': ref_time_str
-        })
+    # Query exact morning candles for the symbol up to reference timestamp from Parquet
+    df_candles = get_market_morning_candles(
+        symbol=symbol,
+        trade_date=ref_date_str,
+        ref_time=ref_time_str,
+        source='parquet'
+    )
         
     if df_candles.empty:
         raise ValueError(f"No morning candles found for symbol '{symbol}' on date '{ref_date_str}' up to {ref_time_str}.")
