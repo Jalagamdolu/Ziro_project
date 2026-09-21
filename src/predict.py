@@ -68,11 +68,19 @@ class PreprocessingPipeline:
         X_scaled = self.scaler.transform(X_clip)
         return X_scaled
 
+__all__ = [
+    "predict_movement",
+    "get_observed_sessions_between",
+    "PreprocessingPipeline",
+    "ensure_pipeline_registered",
+    "INV_CLASS_MAP",
+]
+
 def ensure_pipeline_registered():
     """Ensures PreprocessingPipeline is discoverable by pickle in __main__, main, and builtins."""
     import types
     import builtins
-    for mod_name in ('__main__', 'main'):
+    for mod_name in ('__main__', 'main', '__mp_main__'):
         if mod_name in sys.modules:
             setattr(sys.modules[mod_name], 'PreprocessingPipeline', PreprocessingPipeline)
         else:
@@ -80,6 +88,10 @@ def ensure_pipeline_registered():
             mod.PreprocessingPipeline = PreprocessingPipeline
             sys.modules[mod_name] = mod
     setattr(builtins, 'PreprocessingPipeline', PreprocessingPipeline)
+    if 'src.predict' in sys.modules:
+        setattr(sys.modules['src.predict'], 'PreprocessingPipeline', PreprocessingPipeline)
+    if 'predict' in sys.modules:
+        setattr(sys.modules['predict'], 'PreprocessingPipeline', PreprocessingPipeline)
 
 # Ensure PreprocessingPipeline is registered across all execution environments
 ensure_pipeline_registered()

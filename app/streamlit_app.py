@@ -18,13 +18,24 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+src_path = str(PROJECT_ROOT / "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
-from src.predict import (
-    predict_movement,
-    get_observed_sessions_between,
-    PreprocessingPipeline,
-    ensure_pipeline_registered
-)
+try:
+    from src.predict import (
+        predict_movement,
+        get_observed_sessions_between,
+        PreprocessingPipeline,
+        ensure_pipeline_registered
+    )
+except ImportError:
+    from predict import (
+        predict_movement,
+        get_observed_sessions_between,
+        PreprocessingPipeline,
+        ensure_pipeline_registered
+    )
 
 # Ensure custom unpickler class is present in Streamlit runner namespace
 ensure_pipeline_registered()
