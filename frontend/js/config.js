@@ -3,8 +3,8 @@
  */
 
 export const CONFIG = {
-  // Default to local FastAPI server, or window override if provided
-  DEFAULT_API_BASE_URL: window.API_BASE_URL || 'http://127.0.0.1:8000',
+  // Default to production Render FastAPI server, or window override if provided
+  DEFAULT_API_BASE_URL: window.API_BASE_URL || 'https://ziro-prediction-api.onrender.com',
   
   // Storage key for user-configured API URL
   STORAGE_KEY_API_URL: 'ziro_api_base_url',
