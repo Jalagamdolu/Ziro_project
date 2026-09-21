@@ -68,8 +68,21 @@ class PreprocessingPipeline:
         X_scaled = self.scaler.transform(X_clip)
         return X_scaled
 
-# Ensure PreprocessingPipeline is found when unpickling objects pickled in __main__
-setattr(__main__, 'PreprocessingPipeline', PreprocessingPipeline)
+def ensure_pipeline_registered():
+    """Ensures PreprocessingPipeline is discoverable by pickle in __main__, main, and builtins."""
+    import types
+    import builtins
+    for mod_name in ('__main__', 'main'):
+        if mod_name in sys.modules:
+            setattr(sys.modules[mod_name], 'PreprocessingPipeline', PreprocessingPipeline)
+        else:
+            mod = types.ModuleType(mod_name)
+            mod.PreprocessingPipeline = PreprocessingPipeline
+            sys.modules[mod_name] = mod
+    setattr(builtins, 'PreprocessingPipeline', PreprocessingPipeline)
+
+# Ensure PreprocessingPipeline is registered across all execution environments
+ensure_pipeline_registered()
 
 _HISTORICAL_DATES_CACHE = None
 
@@ -247,6 +260,9 @@ def predict_movement(
     
     df_feat = pd.DataFrame([feat_dict])
     
+    # Ensure PreprocessingPipeline is discoverable in unpickler namespace
+    ensure_pipeline_registered()
+
     # Load model and preprocessor
     if model_type == 'h1' and observed_sessions_ahead == 1:
         model = joblib.load(MODELS_DIR / "best_h1_model.joblib")

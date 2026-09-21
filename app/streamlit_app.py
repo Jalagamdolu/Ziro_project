@@ -19,7 +19,17 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.predict import predict_movement, get_observed_sessions_between
+from src.predict import (
+    predict_movement,
+    get_observed_sessions_between,
+    PreprocessingPipeline,
+    ensure_pipeline_registered
+)
+
+# Ensure custom unpickler class is present in Streamlit runner namespace
+ensure_pipeline_registered()
+if __name__ in sys.modules:
+    setattr(sys.modules[__name__], 'PreprocessingPipeline', PreprocessingPipeline)
 from src.paper_trading import (
     create_paper_prediction,
     resolve_all_pending,
